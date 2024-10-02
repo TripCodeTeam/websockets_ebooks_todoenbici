@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Expone el puerto necesario (3000 por defecto en NestJS)
-EXPOSE 8080
+EXPOSE 3000
 
 # Usa el comando estándar de inicio de NestJS
 CMD ["npm", "run", "start:prod"]
