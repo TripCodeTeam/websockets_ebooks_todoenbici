@@ -1,0 +1,77 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("MONGODB_URI")
+}
+
+model Clients {
+    id              String            @id @default(uuid()) @map("_id")
+    completeName    String
+    username        String            @unique
+    email           String            @unique
+    password        String
+    rol             String?
+    books_purchased BooksClient[]
+    created_at      DateTime          @default(now())
+    updated_at      DateTime          @updatedAt
+    Purchased       Purchased[]
+    PurchasedRecord PurchasedRecord[]
+}
+
+model Books {
+    id           String      @id @default(uuid()) @map("_id")
+    nameBook     String      @unique
+    description  String
+    author       String
+    price        Int
+    number_pages Int
+    cover_page   String
+    back_cover   String
+    editorial    String?
+    language     String[]
+    genre        String[]
+    stock        Int
+    rating       Int         @default(0)
+    upId         String
+    media        String
+    isPhysical   Boolean
+    isVirtual    Boolean
+    Purchased    Purchased[]
+    created_at   DateTime    @default(now())
+    updated_at   DateTime    @updatedAt
+}
+
+model BooksClient {
+    id                String          @id @default(uuid()) @map("_id")
+    bookId            String
+    clientId          String
+    purchasedRecordId String
+    purchasedRecord   PurchasedRecord @relation(fields: [purchasedRecordId], references: [id])
+    Clients           Clients?        @relation(fields: [clientId], references: [id])
+}
+
+model Purchased {
+    id            String   @id @default(uuid()) @map("_id")
+    client        Clients? @relation(fields: [clientId], references: [id])
+    clientId      String
+    book          Books?   @relation(fields: [bookId], references: [id])
+    bookId        String
+    purchased_key String   @default("sin aprobacion")
+    isAproved     Boolean  @default(false)
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
+}
+
+model PurchasedRecord {
+    id            String        @id @default(uuid()) @map("_id")
+    bookId        String
+    purchased_key String
+    clientId      String
+    client        Clients       @relation(fields: [clientId], references: [id])
+    created_at    DateTime      @default(now())
+    updated_at    DateTime      @updatedAt
+    booksClient   BooksClient[]
+}
