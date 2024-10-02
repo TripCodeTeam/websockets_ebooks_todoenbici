@@ -1,35 +1,26 @@
-# Imagen oficial de Node.js 18 (última versión)
+# Usa la imagen oficial de Node.js
 FROM node:18
 
-# Directorio de trabajo
+# Establece el directorio de trabajo
 WORKDIR /usr/src/app
 
-# Cambie temporalmente al usuario 'root' para instalar pm2
-USER root
+# Copia los archivos package.json y package-lock.json (si existe)
+COPY package*.json ./
 
-# Instale PM2 globalmente
-RUN npm install -g pm2
+# Configura npm para manejar errores de red e instala dependencias
+# RUN npm config set fetch-retries 5 \
+#     && npm config set fetch-retry-mintimeout 20000 \
+#     && npm config set fetch-retry-maxtimeout 120000 \
+#     && npm install --verbose
 
-# Cambie nuevamente al usuario 'node'
-USER node
+# Copia el resto del código fuente
+COPY . .
 
-# Copie los archivos package.json y package-lock.json
-COPY --chown=node:node package*.json ./
-
-# Manejo de errores de red e instalacion de dependencias
-RUN npm config set fetch-retries 5 \
-    && npm config set fetch-retry-mintimeout 20000 \
-    && npm config set fetch-retry-maxtimeout 120000 \
-    && npm install --verbose
-
-# Copie el resto del código fuente
-COPY --chown=node:node . .
-
-# Construi la aplicación NestJS
+# Construye la aplicación NestJS
 RUN npm run build
 
-# Expuse el puerto necesario
+# Expone el puerto necesario (3000 por defecto en NestJS)
 EXPOSE 3000
 
-# Configure PM2 para ejecutar la aplicación
-CMD ["pm2-runtime", "npm", "--", "run", "start:prod"]
+# Usa el comando estándar de inicio de NestJS
+CMD ["npm", "run", "start:prod"]
