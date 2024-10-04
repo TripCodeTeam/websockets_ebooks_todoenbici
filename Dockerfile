@@ -16,11 +16,8 @@ COPY . .
 # Construye la aplicación NestJS
 RUN npm run build
 
-# Establece la variable de entorno para el puerto
-ENV PORT=8080
-
 # Expone el puerto que usará la aplicación
-EXPOSE 8080
+EXPOSE 3000
 
 # Comando para iniciar la aplicación
 CMD ["npm", "run", "start:prod"]

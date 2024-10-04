@@ -22,8 +22,13 @@ export class PurchasedController {
   }
 
   // Aprobacion de orden
-  @Post('approve/:id')
+  @Post('approve/ok/:id')
   approvePurchase(@Param('id') purchasedId: string) {
     return this.purchasedService.approvePurchased(purchasedId);
+  }
+
+  @Get('all/:id')
+  CurrentOrders(@Param('id') sellerId: string) {
+    return this.purchasedService.getPurchasedBySeller(sellerId)
   }
 }

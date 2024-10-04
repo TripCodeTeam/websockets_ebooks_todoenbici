@@ -60,21 +60,8 @@ export class PurchasedService {
 
   // Método para crear un nuevo registro de compra (Purchased)
   async createPurchased(clientId: string, bookId: string) {
-    // Verificamos que el cliente y el libro existan en paralelo
-    const [clientExists, bookExists] = await Promise.all([
-      this.prisma.clients.findUnique({ where: { id: clientId } }),
-      this.prisma.books.findUnique({ where: { id: bookId } }),
-    ]);
-
-    if (!clientExists || !bookExists) {
-      // Lanzamos un error si no encontramos el cliente o el libro
-      throw new Error(
-        clientExists ? 'Libro no encontrado' : 'Cliente no encontrado',
-      );
-    }
-
     // Creamos un nuevo registro de compra (Purchased)
-    const newPurchased = await this.prisma.purchased.create({
+    await this.prisma.purchased.create({
       data: {
         clientId, // Referencia al id del cliente
         bookId, // Referencia al id del libro
@@ -83,5 +70,30 @@ export class PurchasedService {
 
     // Retornamos la información de éxito
     return { success: true, data: { clientId, bookId } };
+  }
+
+  // Añade el método para obtener las compras de libros por sellerId
+  async getPurchasedBySeller(sellerId: string) {
+    try {
+      const purchasedBooks = await this.prisma.purchased.findMany({
+        where: {
+          book: {
+            sellerId: sellerId, // Filtra por sellerId en los libros
+          },
+        },
+        include: {
+          book: true, // Incluye información del libro
+          client: true, // Incluye información del cliente que compró el libro
+        },
+      });
+
+      if (!purchasedBooks)
+        throw new Error('No se encontraron compras para este vendedor');
+      return { success: true, data: purchasedBooks };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
   }
 }

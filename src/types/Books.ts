@@ -10,6 +10,8 @@ export type ScalarClients = {
   updated_at?: Date;
 };
 
+export type SafeScalarClients = Omit<ScalarClients, 'password'>;
+
 export type ScalarBooks = {
   id?: string;
   nameBook: string;

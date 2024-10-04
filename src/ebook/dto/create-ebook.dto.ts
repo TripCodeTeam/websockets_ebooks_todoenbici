@@ -11,11 +11,12 @@ export class CreateEbookDto {
   editorial?: string;
   language: string[];
   genre: string[];
-  stock: number;
-  upId: string;
-  media: string;
+  stock?: number;
+  upId?: string;
+  media?: string;
   isPhysical: Boolean;
   isVirtual: Boolean;
+  sellerId?: string;
   created_at?: Date;
   updated_at?: Date;
 }

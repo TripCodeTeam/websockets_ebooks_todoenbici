@@ -13,6 +13,11 @@ export class EbookController {
     return this.ebookService.getAllBooks();
   }
 
+  @Get('all/:id')
+  getAllBooksClient(@Param('id') clientId: string) {
+    return this.ebookService.AllBooksClient(clientId);
+  }
+
   @Get(':id')
   findBook(@Param('id') bookId: string) {
     return this.ebookService.onlyBook(bookId);

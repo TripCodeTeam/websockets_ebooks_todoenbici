@@ -9,27 +9,37 @@ export class EbookService {
 
   // Método para crear un nuevo libro
   async create(createEbookDto: CreateEbookDto) {
-    return await this.prisma.books.create({
-      data: {
-        nameBook: createEbookDto.nameBook,
-        description: createEbookDto.description,
-        author: createEbookDto.author,
-        price: createEbookDto.price,
-        number_pages: createEbookDto.number_pages,
-        editorial: createEbookDto.editorial,
-        language: createEbookDto.language
-          ? (createEbookDto.language as string[])
-          : [],
-        genre: createEbookDto.genre ? (createEbookDto.genre as string[]) : [],
-        cover_page: createEbookDto.cover_page,
-        back_cover: createEbookDto.back_cover,
-        stock: createEbookDto.stock,
-        upId: createEbookDto.upId,
-        media: createEbookDto.media,
-        isPhysical: createEbookDto.isPhysical as boolean,
-        isVirtual: createEbookDto.isVirtual as boolean,
-      },
-    });
+    try {
+      const newBook = await this.prisma.books.create({
+        data: {
+          nameBook: createEbookDto.nameBook,
+          description: createEbookDto.description,
+          author: createEbookDto.author,
+          price: createEbookDto.price,
+          number_pages: createEbookDto.number_pages,
+          editorial: createEbookDto.editorial,
+          language: createEbookDto.language
+            ? (createEbookDto.language as string[])
+            : [],
+          genre: createEbookDto.genre ? (createEbookDto.genre as string[]) : [],
+          cover_page: createEbookDto.cover_page,
+          back_cover: createEbookDto.back_cover,
+          stock: createEbookDto.stock,
+          upId: createEbookDto.upId,
+          media: createEbookDto.media,
+          isPhysical: createEbookDto.isPhysical as boolean,
+          isVirtual: createEbookDto.isVirtual as boolean,
+          sellerId: createEbookDto.sellerId as string,
+        },
+      });
+      console.log('New Book: ', newBook);
+      return { success: true, data: newBook };
+    } catch (error) {
+      console.log('new Book Error: ', error);
+      if (error instanceof Error) {
+        return { success: true, error: error.message };
+      }
+    }
   }
 
   // Método para obtener todos los libros
@@ -110,6 +120,19 @@ export class EbookService {
     } catch (error) {
       if (error instanceof Error) {
         return { success: false, message: error.message };
+      }
+    }
+  }
+
+  async AllBooksClient(sellerId: string) {
+    try {
+      const allBooks = await this.prisma.books.findMany({
+        where: { sellerId },
+      });
+      return { success: true, data: allBooks };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
       }
     }
   }
