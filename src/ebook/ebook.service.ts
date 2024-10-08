@@ -80,13 +80,16 @@ export class EbookService {
 
   async onlyBook(bookId: string) {
     try {
-      const book: ScalarBooks = await this.prisma.books.findFirst({
+      console.log(bookId)
+      const book: ScalarBooks = await this.prisma.books.findUnique({
         where: { id: bookId },
       });
+      
 
       if (!book) throw new Error('El libro no existe');
       return { success: true, data: book };
     } catch (error) {
+      console.error(error)
       if (error instanceof Error) {
         return { success: false, error: error.message };
       }

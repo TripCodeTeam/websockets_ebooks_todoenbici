@@ -16,7 +16,7 @@ export class CreateEbookDto {
   media?: string;
   isPhysical: Boolean;
   isVirtual: Boolean;
-  sellerId?: string;
+  sellerId: string;
   created_at?: Date;
   updated_at?: Date;
 }

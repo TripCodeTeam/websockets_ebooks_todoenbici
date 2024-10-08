@@ -16,7 +16,10 @@ export class AuthService {
   }
 
   // Método de login
-  async validateUser(email: string, password: string): Promise<SafeScalarClients> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<SafeScalarClients> {
     const user = await this.usersService.findByEmail(email);
     console.log('User Found:', user); // Para depuración
     if (
@@ -31,26 +34,44 @@ export class AuthService {
 
   // Método para generar el token JWT
   async login(user: any) {
-    console.log('User to log in:', user);
+    try {
+      console.log('User to log in:', user);
 
-    if (!user.id) {
-      throw new UnauthorizedException('User ID is missing');
+      if (!user.id) {
+        throw new UnauthorizedException('User ID is missing');
+      }
+      // Generamos el token sin verificar si el user tiene id porque ya lo validamos antes
+      const payload = { userId: user.id }; // Ahora, 'user' debería tener 'id' si la validación fue exitosa
+      const token = this.jwtService.sign(payload);
+      // console.log('Generated Token:', token);
+      return {
+        success: true,
+        access_token: token,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
     }
-    // Generamos el token sin verificar si el user tiene id porque ya lo validamos antes
-    const payload = { userId: user.id }; // Ahora, 'user' debería tener 'id' si la validación fue exitosa
-    const token = this.jwtService.sign(payload);
-    console.log('Generated Token:', token);
-    return {
-      access_token: token,
-    };
   }
 
   // Método para obtener la información del usuario a partir del token
   async getProfile(userId: string) {
-    const user = await this.usersService.getSafeUser(userId);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+    try {
+      const user = await this.usersService.getSafeUser(userId);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return { success: true, data: user };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: true, error: error.message };
+      }
     }
-    return user;
   }
 }

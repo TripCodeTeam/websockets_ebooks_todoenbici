@@ -15,24 +15,37 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const hashedPass = await bcrypt.hash(createUserDto.password, 10);
-    return await this.prisma.clients.create({
-      data: {
-        completeName: createUserDto.completeName,
-        username: createUserDto.username,
-        email: createUserDto.email,
-        password: hashedPass,
-        created_at: createUserDto.created_at ?? new Date(),
-        updated_at: createUserDto.updated_at ?? new Date(),
-        rol: createUserDto.rol !== null ? createUserDto.rol : null,
-        books_purchased: {
-          create: createUserDto.books_purchased?.map((book) => ({
-            bookId: book.bookId,
-            purchasedRecordId: book.purchasedRecordId,
-          })),
+    try {
+      const hashedPass = await bcrypt.hash(createUserDto.password, 10);
+      const newUser = await this.prisma.clients.create({
+        data: {
+          completeName: createUserDto.completeName,
+          username: createUserDto.username,
+          email: createUserDto.email,
+          password: hashedPass,
+          created_at: createUserDto.created_at ?? new Date(),
+          updated_at: createUserDto.updated_at ?? new Date(),
+          rol: createUserDto.rol !== null ? createUserDto.rol : null,
+          avatar: createUserDto.avatar,
+          books_purchased: {
+            create: createUserDto.books_purchased?.map((book) => ({
+              bookId: book.bookId,
+              purchasedRecordId: book.purchasedRecordId,
+            })),
+          },
         },
-      },
-    });
+      });
+
+      if (newUser) {
+        return { success: true, data: newUser };
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
   }
 
   // Método para buscar un usuario por email (para login)

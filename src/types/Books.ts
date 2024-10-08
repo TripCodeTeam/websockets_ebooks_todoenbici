@@ -4,6 +4,7 @@ export type ScalarClients = {
   username: string;
   email: string;
   password: string;
+  avatar?: string;
   books_purchased?: string[];
   rol?: string;
   created_at?: Date;
