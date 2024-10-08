@@ -58,6 +58,24 @@ export class PurchasedService {
     }
   }
 
+  async rejectPurchased(purchasedId: string) {
+    try {
+      const order = await this.prisma.purchased.update({
+        where: { id: purchasedId },
+        data: {
+          isAproved: false,
+          purchased_key: 'Rechazado',
+        },
+      });
+
+      return { success: true, data: order };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
+  }
+
   // Método para crear un nuevo registro de compra (Purchased)
   async createPurchased(clientId: string, bookId: string) {
     // Creamos un nuevo registro de compra (Purchased)
@@ -80,6 +98,9 @@ export class PurchasedService {
           book: {
             sellerId: sellerId, // Filtra por sellerId en los libros
           },
+          purchased_key: {
+            not: 'Rechazado',
+          },
         },
         include: {
           book: true, // Incluye información del libro
@@ -87,9 +108,82 @@ export class PurchasedService {
         },
       });
 
-      if (!purchasedBooks)
+      if (!purchasedBooks || purchasedBooks.length === 0) {
         throw new Error('No se encontraron compras para este vendedor');
+      }
+
       return { success: true, data: purchasedBooks };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
+  }
+
+  // Método para obtener las compras aprobadas por sellerId
+  async getApprovedPurchasedBySeller(sellerId: string) {
+    try {
+      const approvedPurchasedBooks = await this.prisma.purchased.findMany({
+        where: {
+          book: {
+            sellerId: sellerId, // Filtra por sellerId en los libros
+          },
+          isAproved: true, // Filtra por compras que estén aprobadas
+        },
+        include: {
+          book: true, // Incluye información del libro
+          client: true, // Incluye información del cliente que compró el libro
+        },
+      });
+
+      if (!approvedPurchasedBooks || approvedPurchasedBooks.length === 0) {
+        throw new Error(
+          'No se encontraron compras aprobadas para este vendedor',
+        );
+      }
+
+      return { success: true, data: approvedPurchasedBooks };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
+  }
+
+  // Método para obtener las compras de un cliente por su clienteId
+  async getPurchasedByClient(clientId: string) {
+    try {
+      const clientPurchasedBooks = await this.prisma.purchased.findMany({
+        where: {
+          clientId: clientId, // Filtra por clienteId en las compras
+        },
+        include: {
+          book: true, // Incluye información del libro
+        },
+      });
+
+      if (!clientPurchasedBooks || clientPurchasedBooks.length === 0) {
+        throw new Error('No se encontraron compras para este cliente');
+      }
+
+      return { success: true, data: clientPurchasedBooks };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+    }
+  }
+
+  async uploadVoucherPurchased(purchasedId: string, voucher: string) {
+    try {
+      const updatedPurchase = await this.prisma.purchased.update({
+        where: { id: purchasedId },
+        data: {
+          voucher, // Actualiza el campo 'voucher' con el nuevo valor
+        },
+      });
+
+      return { success: true, data: updatedPurchase };
     } catch (error) {
       if (error instanceof Error) {
         return { success: false, error: error.message };
